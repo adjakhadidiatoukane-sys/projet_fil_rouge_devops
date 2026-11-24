@@ -1,5 +1,7 @@
-# Secrets et configuration locale
+# Secrets et configuration locale : ne jamais publier
 .env
+*.pem
+*.key
 
 # Python
 __pycache__/
@@ -11,3 +13,4 @@ venv/
 .vscode/
 .idea/
 .DS_Store
+Thumbs.db
