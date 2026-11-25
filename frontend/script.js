@@ -1,81 +1,104 @@
-const API = "/api/tasks";
-const list = document.getElementById("task-list");
-const form = document.getElementById("task-form");
-const input = document.getElementById("task-title");
-const message = document.getElementById("message");
+const TOKEN_KEY = "token";
 
-function showError(text) {
+const $ = (id) => document.getElementById(id);
+const message = $("message");
+
+function show(text, type) {
   message.textContent = text;
+  message.className = type || "";
 }
 
-async function request(url, options) {
-  const response = await fetch(url, options);
+async function api(path, method, body, withToken) {
+  const headers = { "Content-Type": "application/json" };
+  if (withToken) headers.Authorization = "Bearer " + sessionStorage.getItem(TOKEN_KEY);
+  const response = await fetch("/api" + path, {
+    method,
+    headers,
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  const data = await response.json().catch(() => ({}));
   if (!response.ok) {
-    throw new Error("Erreur " + response.status);
+    const error = new Error(data.error || "Erreur " + response.status);
+    error.status = response.status;
+    throw error;
   }
-  return response.status === 204 ? null : response.json();
+  return data;
 }
 
-function render(tasks) {
-  list.innerHTML = "";
-  for (const task of tasks) {
-    const item = document.createElement("li");
-    if (task.done) item.classList.add("done");
-
-    const title = document.createElement("span");
-    title.textContent = task.title;
-    title.addEventListener("click", () => toggle(task.id));
-
-    const remove = document.createElement("button");
-    remove.textContent = "Supprimer";
-    remove.className = "delete";
-    remove.addEventListener("click", () => removeTask(task.id));
-
-    item.append(title, remove);
-    list.append(item);
-  }
+function showProfile(profile) {
+  $("auth").hidden = true;
+  $("profile").hidden = false;
+  $("profile-email").textContent = profile.email;
+  $("profile-created").textContent = profile.created_at;
+  $("profile-name").value = profile.full_name;
+  $("profile-bio").value = profile.bio;
 }
 
-async function load() {
+function showAuth() {
+  sessionStorage.removeItem(TOKEN_KEY);
+  $("profile").hidden = true;
+  $("auth").hidden = false;
+}
+
+async function loadProfile() {
+  if (!sessionStorage.getItem(TOKEN_KEY)) return showAuth();
   try {
-    render(await request(API));
-    showError("");
+    showProfile(await api("/profile", "GET", null, true));
   } catch (error) {
-    showError("Impossible de charger les tâches.");
+    showAuth();
+    show(error.message, "error");
   }
 }
 
-async function toggle(id) {
-  try {
-    await request(API + "/" + id, { method: "PATCH" });
-    load();
-  } catch (error) {
-    showError("Impossible de modifier la tâche.");
-  }
-}
-
-async function removeTask(id) {
-  try {
-    await request(API + "/" + id, { method: "DELETE" });
-    load();
-  } catch (error) {
-    showError("Impossible de supprimer la tâche.");
-  }
-}
-
-form.addEventListener("submit", async (event) => {
+$("register-form").addEventListener("submit", async (event) => {
   event.preventDefault();
   try {
-    await request(API, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title: input.value }),
+    const data = await api("/register", "POST", {
+      full_name: $("register-name").value,
+      email: $("register-email").value,
+      password: $("register-password").value,
     });
-    input.value = "";
-    load();
+    $("register-form").reset();
+    show(data.message, "ok");
   } catch (error) {
-    showError("Impossible d'ajouter la tâche.");
+    show(error.message, "error");
   }
 });
 
-load();
+$("login-form").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  try {
+    const data = await api("/login", "POST", {
+      email: $("login-email").value,
+      password: $("login-password").value,
+    });
+    sessionStorage.setItem(TOKEN_KEY, data.token);
+    $("login-form").reset();
+    show("", "");
+    loadProfile();
+  } catch (error) {
+    show(error.message, "error");
+  }
+});
+
+$("profile-form").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  try {
+    const profile = await api("/profile", "PUT", {
+      full_name: $("profile-name").value,
+      bio: $("profile-bio").value,
+    }, true);
+    showProfile(profile);
+    show("Profil mis à jour.", "ok");
+  } catch (error) {
+    if (error.status === 401) showAuth();
+    show(error.message, "error");
+  }
+});
+
+$("logout").addEventListener("click", () => {
+  showAuth();
+  show("Vous êtes déconnecté.", "ok");
+});
+
+loadProfile();
