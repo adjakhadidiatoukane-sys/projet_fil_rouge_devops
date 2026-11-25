@@ -3,18 +3,46 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Liste de tâches</title>
+  <title>Mon compte</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <main>
-    <h1>Liste de tâches</h1>
-    <form id="task-form">
-      <input id="task-title" type="text" placeholder="Nouvelle tâche" maxlength="200" required>
-      <button type="submit">Ajouter</button>
-    </form>
+    <h1>Mon compte</h1>
     <p id="message" role="status"></p>
-    <ul id="task-list"></ul>
+
+    <!-- Section visible quand l'utilisateur n'est pas connecté -->
+    <section id="auth">
+      <form id="login-form">
+        <h2>Connexion</h2>
+        <label>E-mail <input id="login-email" type="email" required></label>
+        <label>Mot de passe <input id="login-password" type="password" required></label>
+        <button type="submit">Se connecter</button>
+      </form>
+
+      <form id="register-form">
+        <h2>Créer un compte</h2>
+        <label>Nom complet <input id="register-name" type="text" maxlength="100"></label>
+        <label>E-mail <input id="register-email" type="email" required></label>
+        <label>Mot de passe (8 caractères minimum)
+          <input id="register-password" type="password" minlength="8" required>
+        </label>
+        <button type="submit">Créer mon compte</button>
+      </form>
+    </section>
+
+    <!-- Section visible quand l'utilisateur est connecté -->
+    <section id="profile" hidden>
+      <h2>Mon profil</h2>
+      <p>E-mail : <strong id="profile-email"></strong></p>
+      <p>Membre depuis : <span id="profile-created"></span></p>
+      <form id="profile-form">
+        <label>Nom complet <input id="profile-name" type="text" maxlength="100"></label>
+        <label>Biographie <textarea id="profile-bio" rows="4" maxlength="500"></textarea></label>
+        <button type="submit">Enregistrer</button>
+        <button type="button" id="logout" class="secondary">Se déconnecter</button>
+      </form>
+    </section>
   </main>
   <script src="script.js"></script>
 </body>
