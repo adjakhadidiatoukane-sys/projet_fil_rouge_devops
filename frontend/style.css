@@ -8,8 +8,8 @@ body {
 }
 
 main {
-  max-width: 560px;
-  margin: 48px auto;
+  max-width: 480px;
+  margin: 40px auto;
   padding: 24px;
   background: #ffffff;
   border-radius: 12px;
@@ -17,13 +17,19 @@ main {
 }
 
 h1 { margin-top: 0; }
+h2 { font-size: 20px; }
 
-form { display: flex; gap: 8px; }
+form { margin-bottom: 28px; }
 
-input[type="text"] {
-  flex: 1;
+label { display: block; margin-bottom: 12px; font-size: 14px; }
+
+input, textarea {
+  display: block;
+  width: 100%;
+  margin-top: 4px;
   padding: 10px;
   font-size: 16px;
+  font-family: inherit;
   border: 1px solid #b8c0cc;
   border-radius: 6px;
 }
@@ -39,21 +45,9 @@ button {
 }
 
 button:hover { background: #174a94; }
+button.secondary { background: #5b6675; margin-left: 8px; }
+button.secondary:hover { background: #444d59; }
 
-ul { list-style: none; padding: 0; margin: 16px 0 0; }
-
-li {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 0;
-  border-bottom: 1px solid #e2e6ec;
-}
-
-li span { flex: 1; cursor: pointer; }
-li.done span { text-decoration: line-through; color: #6b7686; }
-
-li button.delete { background: #b3261e; padding: 6px 10px; font-size: 14px; }
-li button.delete:hover { background: #8c1d17; }
-
-#message { color: #b3261e; min-height: 1.2em; }
+#message { min-height: 1.2em; font-weight: bold; }
+#message.error { color: #b3261e; }
+#message.ok { color: #1b7a3d; }
